@@ -16,17 +16,22 @@ import {
 import { CreateTodoDto, UpdateTodoDto } from '../dto/dto';
 import { Todo } from '../entities/todo.entity';
 import { TodoService } from '../services/todo.service';
+import { ApiBody, ApiResponse, ApiTags } from '@nestjs/swagger';
 
+@ApiTags('todo')
 @Controller('api/todo')
 export class TodoController {
   constructor(private readonly todoService: TodoService) {}
 
   @Get()
+  @ApiResponse({ status: 200, description: 'Get all todos', type: [Todo] })
   getAllAction(): Promise<Todo[]> {
     return this.todoService.findAll();
   }
 
   @Get(':id')
+  @ApiResponse({ status: 404, description: 'Not found' })
+  @ApiResponse({ status: 200, description: 'Get todo by id', type: Todo })
   async getOneAction(@Param('id') id: string): Promise<Todo> {
     const todo = await this.todoService.findOne(id);
 
@@ -42,6 +47,9 @@ export class TodoController {
   }
 
   @Post()
+  @ApiResponse({ status: 200, description: 'Create todo', type: Todo })
+  @ApiResponse({ status: 404, description: 'Not found' })
+  @ApiBody({ type: CreateTodoDto })
   @UsePipes(
     new ValidationPipe({
       whitelist: true,
@@ -59,6 +67,9 @@ export class TodoController {
   }
 
   @Put(':id')
+  @ApiResponse({ status: 200, description: 'Update todo', type: Todo })
+  @ApiResponse({ status: 404, description: 'Not found' })
+  @ApiBody({ type: UpdateTodoDto })
   @UsePipes(
     new ValidationPipe({
       whitelist: true,
@@ -81,6 +92,8 @@ export class TodoController {
   }
 
   @Delete(':id')
+  @ApiResponse({ status: 200, description: 'Delete todo' })
+  @ApiResponse({ status: 404, description: 'Not found' })
   deleteAction(@Param('id') id: string): Promise<void> {
     return this.todoService.remove(id);
   }
